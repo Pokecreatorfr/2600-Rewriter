@@ -2,6 +2,18 @@
 #include <string>
 
 
+std::string intToHex(int n)
+{
+    std::string result;
+    std::string hex = "0123456789ABCDEF";
+    while (n != 0)
+    {
+        result = hex[n % 16] + result;
+        n = n / 16;
+    }
+    return result;
+}
+
 class Instruction
 {
 public:
@@ -11,6 +23,10 @@ public:
         this->opcode = opcode;
         this->size = size;
         this->disasmstr = disasmstr;
+    }
+    ~Instruction()
+    {
+        ;
     }
     std::string get_name()
     {
@@ -52,21 +68,24 @@ public:
         {
             if(size == 2)
             {
-                bytes_str = "0x" + std::to_string(bytes[0]);
+                bytes_str = "0x" + intToHex(bytes[1]);
             }
             else
-            {
-                bytes_str = "0x" + std::to_string(bytes[1]) + std::to_string(bytes[0]);
+            { 
+                bytes_str = "0x" + intToHex(bytes[2]) + intToHex(bytes[1]);
             }
         }
 
         if(disasmstr.find("%s") != std::string::npos)
         {
-            return disasmstr.replace(disasmstr.find("%s"), 2, bytes_str);
+
+            std::string disasmstr = this->disasmstr;
+            disasmstr.replace(disasmstr.find("$%s"), 3, bytes_str);
+            return disasmstr;
         }
         else
         {
-            return disasmstr + " " + bytes_str;
+            return disasmstr;
         }
 
     }
