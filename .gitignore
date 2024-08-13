@@ -9,3 +9,4 @@ build/
 .vscode/settings.json
 .vscode/tasks.json
 *.a26
+/.vscode

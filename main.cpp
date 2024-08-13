@@ -65,13 +65,13 @@ private:
 };
 
 
-std::vector<Program_Node> program_list;
+std::vector<Program_Node*> program_list;
 
 int main(int argc, char *argv[])
 {
     // get cmd arguments
     //std::string arg1 = argv[1];
-    std::string arg1 = "C:/Users/mathe/Documents/GitHub/2600-Rewriter/Donkey Kong (USA).a26";
+    std::string arg1 = "C:/Users/MatheoVIGNAUD/Documents/2600-Rewriter/Donkey Kong (USA).a26";
 
     // print cmd arguments
     std::cout << "arg1: " << arg1 << std::endl;
@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
     // disassemble
     disassemble(rom, entry_point);
 
-    std::string program_str = program_list[0].get_program();
+    std::string program_str = program_list[0]->get_program();
 
     // save in file
     
@@ -121,7 +121,7 @@ bool is_already_analyzed(uint16_t address)
 {
     for (int i = 0; i < program_list.size(); i++)
     {
-        if (program_list[i].get_address() >= address && program_list[i].get_address() <= address + 2)
+        if (program_list[i]->get_address() <= address && program_list[i]->get_address() + program_list[i]->get_size() >= address)
         {
             std::cout << "Address: " << address << " already analyzed" << std::endl;
             return true;
@@ -134,9 +134,9 @@ bool is_already_analyzed(uint16_t address, int id)
 {
     for (int i = 0; i < program_list.size(); i++)
     {
-        if (program_list[i].get_address() >= address && program_list[i].get_address() <= address + 2)
+        if (program_list[i]->get_address() <= address && program_list[i]->get_address() + program_list[i]->get_size() >= address)
         {
-            if (program_list[i].get_id() != id)
+            if (program_list[i]->get_id() != id)
             {
                 std::cout << "Address: " << address << " already analyzed" << std::endl;
                 return true;
@@ -155,13 +155,12 @@ void disassemble(std::vector<uint8_t> rom, uint16_t entry_point)
     // check if entry point already analyzed
     for (int i = 0; i < program_list.size(); i++)
     {
-        //std::cout<< "program_list_size:" << program_list.size() << std::endl;
         if (is_already_analyzed(entry_point))
         {
             printf("%s\n", "Entry point already analyzed");
             return;
         }
-        while( program_list[i].get_id() >= id)
+        while( program_list[i]->get_id() >= id)
         {
             id++;
         }
@@ -173,7 +172,9 @@ void disassemble(std::vector<uint8_t> rom, uint16_t entry_point)
     Program_Node program_node(entry_point, id);
 
     // add program node to program list
-    program_list.push_back(program_node);
+    program_list.push_back(&program_node);
+
+    std::cout << "program node id: " << program_node.get_id() << std::endl;
 
     //printf("program node address: %d\n", program_node.get_address());
 
@@ -183,7 +184,7 @@ void disassemble(std::vector<uint8_t> rom, uint16_t entry_point)
 
     bool quit = false;
 
-    while(!is_already_analyzed(entry_point + offset, id) && entry_point + offset < rom.size() || quit )
+    while(!is_already_analyzed(entry_point + offset, id) && entry_point + offset < rom.size() )
     {
         // get opcode
         uint8_t opcode = rom[entry_point + offset];
@@ -233,7 +234,8 @@ void disassemble(std::vector<uint8_t> rom, uint16_t entry_point)
                 std::cout<<"Reccurtion" << std::endl;
                 if(ActualInstruction->get_size() == 2)
                 {
-                    int ep = entry_point + offset + ActualInstruction->get_size() - rom[entry_point + offset + 1];
+                    std::cout<< "Branch ::::::::::::::::::::" << std::to_string((int8_t)rom[entry_point + offset + 1]) << std::endl;
+                    int ep = entry_point + offset + ActualInstruction->get_size() + (int8_t)rom[entry_point + offset + 1];
                     disassemble(rom , ep);
                 }
                 else
@@ -247,15 +249,20 @@ void disassemble(std::vector<uint8_t> rom, uint16_t entry_point)
             std::string instruction = ActualInstruction->disasm(instruct_bytes);
             std::cout << " 0x" << intToHex(entry_point + offset) << " |  " << instruct_str  << " |  " << instruction.c_str() << std::endl ;
 
+            // increment offset
+            offset += size;
+
             // set program
             program_node.set_program(program_node.get_program() + instruction + "\n");
 
 
             // set size
-            program_node.set_size( program_node.get_size() + size);
+            program_node.set_size(offset);
 
-            // increment offset
-            offset += size;
+            
+            if (ActualInstruction->get_name() == "RTS") {
+                quit = true;
+            }
         }
         else
         {
@@ -264,13 +271,11 @@ void disassemble(std::vector<uint8_t> rom, uint16_t entry_point)
             program_node.set_program(program_node.get_program() + "Unknown opcode" + "\n");
             program_node.set_size( program_node.get_size() + 1 );
         }
-        //_sleep(5);
-        /*if (ActualInstruction->get_name() == "RTI") {
-            quit = true;
-        }*/
+        //_sleep(10);
     }
     std::string filname = "node" + std::to_string(id) + ".txt" ;
     std::ofstream file_out(filname);
     file_out << program_node.get_program();
     file_out.close();
+    return;
 }
