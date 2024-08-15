@@ -66,6 +66,7 @@ private:
 
 
 std::vector<Program_Node*> program_list;
+bool* analysis_table = nullptr;
 
 int main(int argc, char *argv[])
 {
@@ -105,13 +106,24 @@ int main(int argc, char *argv[])
     std::cout <<  std::to_string(rom[ENTRY_POINT])  << std::endl;
     std::cout << std::to_string(rom[ENTRY_POINT + 1] - 0xF0) << std::endl;
 
+    analysis_table = new bool[size];
+
     // disassemble
     disassemble(rom, entry_point);
 
-    std::string program_str = program_list[0]->get_program();
+    // save analysis table in file
+    std::ofstream file_out("analysis_table.txt");
+    for (int i = 0; i < size; i++)
+    {
+        file_out << analysis_table[i] ? "1" : "0" ;
+        if(i % 16 == 0)
+        {
+            file_out << std::endl;
+        }
+    }
 
-    // save in file
-    
+    // free memory
+    delete[] analysis_table;
     
 
     return 0;
@@ -260,8 +272,13 @@ void disassemble(std::vector<uint8_t> rom, uint16_t entry_point)
             program_node.set_size(offset);
 
             
-            if (ActualInstruction->get_name() == "RTS") {
+            /*if (ActualInstruction->get_name() == "RTS") {
                 quit = true;
+            }*/
+
+           for (int i = 0; i <= size; i++)
+            {
+                analysis_table[entry_point + offset + i] = true;
             }
         }
         else
