@@ -14,6 +14,22 @@ std::string intToHex(int n)
     return result;
 }
 
+std::string intToHex(int n , int min_digit)
+{
+    std::string result;
+    std::string hex = "0123456789ABCDEF";
+    while (n != 0)
+    {
+        result = hex[n % 16] + result;
+        n = n / 16;
+    }
+    while(result.size() < min_digit)
+    {
+        result = "0" + result;
+    }
+    return result;
+}
+
 class Instruction
 {
 public:
@@ -68,11 +84,11 @@ public:
         {
             if(size == 2)
             {
-                bytes_str = "0x" + intToHex(bytes[1]);
+                bytes_str = "0x" + intToHex(bytes[1] , 2);
             }
             else
             { 
-                bytes_str = "0x" + intToHex(bytes[2]) + intToHex(bytes[1]);
+                bytes_str = "0x" + intToHex(bytes[2] , 2) + intToHex(bytes[1] , 2);
             }
         }
 
@@ -160,7 +176,7 @@ std::vector<Instruction> Instruction_Set = {
     Instruction("PLA", 0x68, 1, "PLA"),
     Instruction("ADC", 0x69, 2, "ADC #$%s"),
     Instruction("ROR", 0x6A, 1, "ROR A"),
-    Instruction("JMP", 0x6C, 3, "JMP ($%s)"),
+    Instruction("JMP", 0x6C, 2, "JMP ($%s)"),
     Instruction("ADC", 0x6D, 3, "ADC $%s"),
     Instruction("ROR", 0x6E, 3, "ROR $%s"),
     Instruction("BVS", 0x70, 2, "BVS $%s"),
