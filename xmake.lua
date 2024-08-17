@@ -1,12 +1,23 @@
 add_rules("mode.debug", "mode.release")
 
+
 set_languages("c++17")
 set_optimize("fastest")
+add_requires("nlohmann_json")
 
 target("2600-Rewriter")
     set_kind("binary")
     add_files("main.cpp")
     add_includedirs("include")
+    add_packages("nlohmann_json")
+
+    after_build(function (target)
+        -- Chemin du fichier source
+        local source_file = path.join(os.projectdir(), "6502_instructions.json")
+        local dest_dir = target:targetdir()
+        os.cp(source_file, dest_dir)
+        print("Copied 6502_instructions.json to " .. dest_dir)
+    end)
 
 --
 -- If you want to known more usage about xmake, please see https://xmake.io

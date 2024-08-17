@@ -1,4 +1,3 @@
-#include <iostream>
 #include <stdio.h>
 #include <stdint.h>
 #include <fstream>
@@ -85,6 +84,9 @@ void add_to_jump_offsets(int adr)
 
 int main(int argc, char *argv[])
 {
+
+    buildInstructionSetVector();
+
     // get cmd arguments
     //std::string arg1 = argv[1];
     std::string arg1 = "C:/Users/mathe/Documents/GitHub/2600-Rewriter/Donkey Kong (USA).a26";
