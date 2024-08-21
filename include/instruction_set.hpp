@@ -4,6 +4,40 @@
 #include <nlohmann/json.hpp>
 
 
+
+struct Mem2600
+{
+    uint8_t A;
+    uint8_t X;
+    uint8_t Y;
+    bool N;
+    bool V;
+    bool Z;
+    bool C;
+    uint16_t PC;
+    uint8_t SP;
+    uint8_t TIA[64];
+    uint8_t RAM[128];
+    uint8_t RIOT[32];
+    std::vector<uint8_t> ROM;
+};
+
+uint8_t readMemory(Mem2600 &memory, uint16_t adress)
+{
+    int x = adress & 0xF000 >> 12;
+    int y = adress & 0x0F00 >> 8;
+    int z = adress & 0x00F0 >> 4;
+    if(x%2 == 1)
+    {
+        return memory.ROM[adress & 0x0FFF];
+    }
+    else
+    {
+        if(y == )
+    }
+}
+
+
 std::string intToHex(int n)
 {
     std::string result;
@@ -135,6 +169,59 @@ public:
             break;
         }
         return dasm;
+    }
+    uint16_t get_adress(std::vector<uint8_t> bytes, Mem2600 &memory)
+    {
+        // n'utiliser cette methode que pour les instructions ou il y a un saut
+        // exemple : JMP, BCC, BCS, BEQ, BMI, BNE, BPL, BVC, BVS
+        switch (this->adressMode)
+        {
+        case ZeroPage:
+            return (memory.PC & 0xFF00) + bytes[1];
+            break;
+        case ZeroPageX:
+            return (memory.PC & 0xFF00) + (bytes[1] + memory.X) % 0x100;
+            break;
+        case ZeroPageY:
+            return (memory.PC & 0xFF00) + (bytes[1] + memory.Y) % 0x100;
+            break;
+        case Absolute:
+            return (bytes[2] << 8) + bytes[1];
+            break;
+        case AbsoluteX:
+            return (bytes[2] << 8) + bytes[1] + memory.X;
+            break;
+        case AbsoluteY:
+            return (bytes[2] << 8) + bytes[1] + memory.Y;
+            break;
+        case Indirect:
+            return (memory.RAM[(bytes[2] << 8) + bytes[1] + 1] << 8) + memory.RAM[(bytes[2] << 8) + bytes[1]];
+            break;
+        case IndirectX:
+            return (memory.RAM[(bytes[1] + memory.X + 1) % 0x100] << 8) + memory.RAM[(bytes[1] + memory.X)];
+            break;
+        case IndirectY:
+            return (memory.RAM[(bytes[1] + 1) % 0x100] << 8) + memory.RAM[bytes[1]] + memory.Y;
+            break;
+        case Relative:
+            return memory.PC + (int8_t)bytes[1];
+            break;
+        case Implied:
+            break;
+        case Accumulator:
+            break;
+        default:
+            break;
+        };
+        return 0;
+    }
+    void execute(std::vector<uint8_t> bytes, Mem2600 &memory)
+    {
+        switch (this->opcode)
+        {
+            case "ADC":
+
+                break;
     }
 private:
     std::string name;

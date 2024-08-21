@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
 
     // get cmd arguments
     //std::string arg1 = argv[1];
-    std::string arg1 = "C:/Users/mathe/Documents/GitHub/2600-Rewriter/Donkey Kong (USA).a26";
+    std::string arg1 = "C:/Users/MatheoVIGNAUD/Documents/2600-Rewriter/Donkey Kong (USA).a26";
 
     // print cmd arguments
     std::cout << "arg1: " << arg1 << std::endl;
