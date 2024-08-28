@@ -832,7 +832,7 @@ public:
         }
 
     }
-private:
+    private:
     std::string name;
     uint8_t opcode;
     uint8_t size;
